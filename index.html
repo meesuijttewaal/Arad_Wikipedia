@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Article Title - MyWiki</title>
+<style>
+  :root{
+    --border: #a2a9b1;
+    --border-light: #c8ccd1;
+    --link: #0645ad;
+    --link-visited: #0b0080;
+    --bg: #fff;
+    --page-bg: #fff;
+    --panel-bg: #f8f9fa;
+    --text: #202122;
+    --muted: #54595d;
+    --topbar: #1a1a2e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0;
+    font-family: sans-serif, Arial, Helvetica;
+    color: var(--text);
+    background: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:visited { color: var(--link-visited); }
+
+  /* Thin top strip like the 25th-anniversary bar */
+  .top-strip {
+    height:6px;
+    background: linear-gradient(90deg, #36c, #1a1a2e 40%, #1a1a2e);
+  }
+
+  /* Header */
+  .site-header {
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:12px 20px;
+    border-bottom:1px solid var(--border-light);
+  }
+  .hamburger {
+    font-size:20px;
+    color:#202122;
+    cursor:pointer;
+    line-height:1;
+    padding:4px;
+  }
+  .site-logo {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .site-logo .wordmark {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size:22px;
+    letter-spacing:.5px;
+    color:#000;
+  }
+  .site-logo .badge {
+    font-size:11px;
+    background:#eaecf0;
+    color:#3366cc;
+    border-radius:10px;
+    padding:1px 6px;
+    font-weight:bold;
+    align-self:flex-start;
+    margin-top:-6px;
+  }
+  .site-logo small {
+    display:block;
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:-2px;
+  }
+
+  .searchbar {
+    flex:1;
+    max-width:600px;
+    margin:0 auto;
+    display:flex;
+  }
+  .searchbar .search-input-wrap {
+    flex:1;
+    display:flex;
+    align-items:center;
+    border:1px solid var(--border);
+    border-right:none;
+    border-radius:2px 0 0 2px;
+    padding:0 10px;
+    background:#fff;
+  }
+  .searchbar .search-icon { color:var(--muted); margin-right:8px; font-size:14px; }
+  .searchbar input[type="text"] {
+    border:none;
+    outline:none;
+    padding:8px 0;
+    flex:1;
+    font-size:14px;
+  }
+  .searchbar button {
+    padding:0 14px;
+    border:1px solid var(--border);
+    background:#f8f9fa;
+    cursor:pointer;
+    border-radius:0 2px 2px 0;
+  }
+
+  .header-links {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    white-space:nowrap;
+    font-size:13.5px;
+  }
+
+  /* Layout */
+  .layout {
+    display:grid;
+    grid-template-columns: 210px minmax(0,1fr) 240px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  /* Left sidebar */
+  .sidebar {
+    padding:18px 14px;
+    border-right:1px solid var(--border-light);
+  }
+  .toc-box {
+    border:1px solid var(--border-light);
+    border-radius:4px;
+    padding:10px 12px;
+    font-size:13px;
+  }
+  .toc-box .toc-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:bold;
+    margin-bottom:6px;
+  }
+  .toc-box .toc-header .hide-link {
+    font-weight:normal;
+    font-size:12px;
+    background:#eaecf0;
+    padding:2px 8px;
+    border-radius:2px;
+    color:var(--text);
+  }
+  .toc-box ol {
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .toc-box ol ol { padding-left:14px; margin-top:2px; }
+  .toc-box li { margin:5px 0; }
+  .toc-box li.top { font-weight:600; }
+  .toc-box .chev { display:inline-block; width:10px; color:var(--muted); font-size:10px; }
+
+  /* Center content */
+  .content {
+    padding:20px 28px 50px;
+    min-width:0;
+  }
+
+  .article-title-row {
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+  }
+  h1.article-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:normal;
+    font-size:30px;
+    margin:0 0 8px;
+  }
+  .lang-select {
+    font-size:13px;
+    color:var(--link);
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+
+  .article-tabs {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--border-light);
+    margin-bottom:14px;
+    font-size:13.5px;
+  }
+  .article-tabs .left-tabs span { margin-right:16px; padding-bottom:8px; display:inline-block; color:var(--muted); }
+  .article-tabs .left-tabs span.active { color:var(--text); border-bottom:2px solid var(--text); font-weight:600; }
+  .article-tabs .right-tabs { display:flex; align-items:center; gap:16px; color:var(--link); }
+  .article-tabs .right-tabs .active { color:var(--text); border-bottom:2px solid var(--text); font-weight:600; padding-bottom:8px; }
+  .article-tabs .kebab { color:var(--muted); font-weight:bold; letter-spacing:1px; cursor:pointer; }
+
+  .from-wiki {
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:14px;
+  }
+
+  .article-note {
+    background:#f8f9fa;
+    border:1px solid var(--border-light);
+    border-radius:4px;
+    font-size:12.5px;
+    padding:8px 12px;
+    margin-bottom:16px;
+    color:var(--muted);
+  }
+
+  h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:normal;
+    font-size:22px;
+    border-bottom:1px solid var(--border-light);
+    padding-bottom:4px;
+    margin-top:30px;
+  }
+  h3 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:bold;
+    font-size:16px;
+    margin-top:20px;
+  }
+
+  p { margin:0 0 14px; text-align:left; }
+
+  sup.cite { font-size:11px; color:var(--link); }
+
+  .references {
+    font-size:12.5px;
+    padding-left:22px;
+    margin-top:8px;
+  }
+  .references li { margin-bottom:6px; }
+
+  .last-edited {
+    font-size:12px;
+    color:var(--muted);
+    border-top:1px solid var(--border-light);
+    margin-top:30px;
+    padding-top:8px;
+  }
+
+  /* Right rail: infobox + appearance panel */
+  .right-rail {
+    padding:18px 16px;
+    border-left:1px solid var(--border-light);
+  }
+
+  .infobox {
+    border:1px solid var(--border-light);
+    border-radius:4px;
+    background:#fff;
+    font-size:12.5px;
+    margin-bottom:24px;
+  }
+  .infobox .infobox-title {
+    text-align:center;
+    font-weight:bold;
+    font-size:16px;
+    padding:8px 6px 6px;
+  }
+  .infobox img {
+    width:100%;
+    display:block;
+  }
+  .infobox .caption {
+    text-align:center;
+    font-size:11.5px;
+    padding:6px 10px;
+    border-bottom:1px solid var(--border-light);
+    color: var(--muted);
+  }
+  .infobox table { width:100%; border-collapse:collapse; }
+  .infobox td, .infobox th {
+    padding:5px 10px;
+    vertical-align:top;
+    border-top:1px solid #eaecf0;
+  }
+  .infobox th {
+    text-align:left;
+    font-weight:bold;
+    width:36%;
+  }
+  .infobox .section-row td {
+    text-align:center;
+    font-weight:bold;
+    background:#eaecf0;
+  }
+
+  .appearance-panel {
+    border:1px solid var(--border-light);
+    border-radius:4px;
+    padding:12px 14px;
+    font-size:13px;
+  }
+  .appearance-panel .ap-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:bold;
+    margin-bottom:10px;
+  }
+  .appearance-panel .ap-header .hide-link {
+    font-weight:normal;
+    font-size:12px;
+    background:#eaecf0;
+    padding:2px 8px;
+    border-radius:2px;
+    color:var(--text);
+  }
+  .appearance-panel h4 {
+    font-size:12.5px;
+    margin:12px 0 6px;
+    color:var(--text);
+  }
+  .appearance-panel label {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:6px;
+    font-size:13px;
+  }
+
+  /* Footer */
+  .footer {
+    max-width:1400px;
+    margin:0 auto;
+    border-top:1px solid var(--border-light);
+    padding:16px 28px;
+    font-size:11.5px;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar, .right-rail { border:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-strip"></div>
+
+  <!-- Header -->
+  <div class="site-header">
+    <span class="hamburger">&#9776;</span>
+    <div class="site-logo">
+      <div>
+        <span class="wordmark">MyWiki</span>
+        <small>The Free Encyclopedia</small>
+      </div>
+    </div>
+    <div class="searchbar">
+      <div class="search-input-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" placeholder="Search MyWiki">
+      </div>
+      <button>Search</button>
+    </div>
+    <div class="header-links">
+      <a href="#">Donate</a>
+      <a href="#">Create account</a>
+      <a href="#">Log in</a>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- Left sidebar: Table of Contents -->
+    <div class="sidebar">
+      <div class="toc-box">
+        <div class="toc-header">
+          <span>Contents</span>
+          <span class="hide-link">hide</span>
+        </div>
+        <ol>
+          <li class="top">(Top)</li>
+          <li><a href="#early-life">Early life</a></li>
+          <li><span class="chev">&#9656;</span><a href="#career">Career</a></li>
+          <li><a href="#personal-life">Personal life</a></li>
+          <li><a href="#legacy">Legacy</a></li>
+          <li><span class="chev">&#9656;</span><a href="#references">References</a></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Center content -->
+    <div class="content">
+      <div class="article-title-row">
+        <h1 class="article-title">Article Title Goes Here</h1>
+        <div class="lang-select">&#28450;&#12354; 12 languages &#9662;</div>
+      </div>
+
+      <div class="article-tabs">
+        <div class="left-tabs">
+          <span class="active">Article</span>
+          <span>Talk</span>
+        </div>
+        <div class="right-tabs">
+          <span class="active">Read</span>
+          <span>View source</span>
+          <span>View history</span>
+          <span class="kebab">&#8942;</span>
+        </div>
+      </div>
+
+      <div class="from-wiki">From MyWiki, the free encyclopedia</div>
+
+      <div class="article-note">
+        This article is about a fictional/tribute subject created for personal use. It is not affiliated with or endorsed by Wikipedia or the Wikimedia Foundation.
+      </div>
+
+      <p>
+        <strong>Subject Name</strong> (born Month Day, Year) is a [description] known for [notable achievement or reason for the page].
+        This opening paragraph should summarize who they are in a neutral, encyclopedic tone, similar to a real Wikipedia lead section.<sup class="cite">[1]</sup>
+      </p>
+      <p>
+        Add a second lead paragraph here with more background — where they're from, what they do, and why this article exists.
+        You can freely edit this text once you download the file.<sup class="cite">[2]</sup>
+      </p>
+
+      <h2 id="early-life">Early life</h2>
+      <p>
+        Write about the subject's early life, upbringing, education, and formative experiences here. Replace this
+        placeholder text with real (or fictional, for fun) details about your friend.<sup class="cite">[3]</sup>
+      </p>
+
+      <h2 id="career">Career</h2>
+      <p>
+        Overview paragraph about their career goes here.
+      </p>
+
+      <h3 id="early-career">Early career</h3>
+      <p>
+        Details about how they got started.
+      </p>
+
+      <h3 id="rise-to-prominence">Rise to prominence</h3>
+      <p>
+        Details about a turning point or achievement.<sup class="cite">[4]</sup>
+      </p>
+
+      <h2 id="personal-life">Personal life</h2>
+      <p>
+        Details about hobbies, family, relationships, or fun facts.
+      </p>
+
+      <h2 id="legacy">Legacy</h2>
+      <p>
+        A closing section about their impact, reputation, or how people remember them.
+      </p>
+
+      <h2 id="references">References</h2>
+      <ol class="references">
+        <li>Example Source. "Article title." <em>Publication Name</em>, Year.</li>
+        <li>Example Source Two. "Another article." <em>Publication Name</em>, Year.</li>
+        <li>Example Source Three. Interview, Year.</li>
+        <li>Example Source Four. "Yet another reference." <em>Publication Name</em>, Year.</li>
+      </ol>
+
+      <div class="last-edited">
+        This page was last edited on [Date], at [Time]. Content is available under a Creative Commons-style license for personal use.
+      </div>
+    </div>
+
+    <!-- Right rail: infobox + appearance panel -->
+    <div class="right-rail">
+      <div class="infobox">
+        <div class="infobox-title">Subject Name</div>
+        <img src="https://via.placeholder.com/260x180?text=Photo" alt="placeholder photo">
+        <div class="caption">Caption describing the photo goes here</div>
+        <table>
+          <tr class="section-row"><td colspan="2">Personal details</td></tr>
+          <tr><th>Born</th><td>Month Day, Year<br>Birthplace</td></tr>
+          <tr><th>Nationality</th><td>Country</td></tr>
+          <tr><th>Occupation</th><td>Occupation(s)</td></tr>
+          <tr><th>Known for</th><td>Brief description of notability</td></tr>
+          <tr><th>Years active</th><td>20XX–present</td></tr>
+          <tr class="section-row"><td colspan="2">Other details</td></tr>
+          <tr><th>Spouse(s)</th><td>Name</td></tr>
+          <tr><th>Website</th><td><a href="#">example.com</a></td></tr>
+        </table>
+      </div>
+
+      <div class="appearance-panel">
+        <div class="ap-header">
+          <span>Appearance</span>
+          <span class="hide-link">hide</span>
+        </div>
+        <h4>Text</h4>
+        <label><input type="radio" name="text-size"> Small</label>
+        <label><input type="radio" name="text-size" checked> Standard</label>
+        <label><input type="radio" name="text-size"> Large</label>
+        <h4>Width</h4>
+        <label><input type="radio" name="width" checked> Standard</label>
+        <label><input type="radio" name="width"> Wide</label>
+        <h4>Color</h4>
+        <label><input type="radio" name="color"> Automatic</label>
+        <label><input type="radio" name="color" checked> Light</label>
+        <label><input type="radio" name="color"> Dark</label>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    This is a personal, unofficial page created independently and is not affiliated with, endorsed by, or connected to Wikipedia or the Wikimedia Foundation.<br>
+    MyWiki® is not a real trademark — customize this footer as you like.
+  </div>
+
+</body>
+</html>
